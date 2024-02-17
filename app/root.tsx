@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { LinksFunction } from "@remix-run/node";
 import appStyleHref from './app.css'
 import {
@@ -12,7 +13,7 @@ import {
   Link,
   json
 } from "@remix-run/react";
-import { getContacts } from "./data";
+import { getContacts } from "./data.server";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStyleHref }
@@ -49,14 +50,12 @@ export default function App() {
               />
               <div id="search-spinner" aria-hidden hidden={true} />
             </Form>
-            <Form method="post">
-              <button type="submit">New</button>
-            </Form>
+            <Link to="contacts/create" className="buttonLink"> Create</Link>
           </div>
           <nav>
           {contacts.length ? (
               <ul>
-                {contacts.map((contact) => (
+                {contacts.map((contact : any) => (
                   <li key={contact.id}>
                     <Link to={`contacts/${contact.id}`}>
                       {contact.first || contact.last ? (

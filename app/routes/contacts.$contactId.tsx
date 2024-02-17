@@ -1,10 +1,10 @@
 import { Form, json, useLoaderData } from "@remix-run/react";
 import type { FunctionComponent } from "react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import type { ContactRecord } from "../data";
+import type { ContactRecord } from "../data.server";
 import invariant from "tiny-invariant";
 
-import { getContact } from "../data";
+import { getContact } from "../data.server";
 
 export async function loader({ params } : LoaderFunctionArgs) {
   invariant(params.contactId, "Missing contactId param")
@@ -28,8 +28,7 @@ export default function Contact() {
           key={contact.avatar}
           src={contact.avatar}
         />
-      </div>
-
+      </div> 
       <div>
         <h1>
           {contact.first || contact.last ? (
