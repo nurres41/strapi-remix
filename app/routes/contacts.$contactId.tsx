@@ -1,4 +1,4 @@
-import { Form, json, useLoaderData } from "@remix-run/react";
+import { Form, isRouteErrorResponse, json, useLoaderData, useNavigate, useRouteError } from "@remix-run/react";
 import type { FunctionComponent } from "react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import type { ContactRecord } from "../data.server";
@@ -14,6 +14,28 @@ export async function loader({ params } : LoaderFunctionArgs) {
     throw new Response("Not Found!", {status: 404})
   }
   return json(contact)
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const navigate = useNavigate()
+  return (
+      <div className="contact-error">
+        <h1>
+          Your Contact failed
+        </h1>
+        <p>
+          {isRouteErrorResponse(error)
+            ? `${error.status} ${error.statusText}`
+            : error instanceof Error
+            ? error.message
+            : "Unknown Error"}
+        </p> 
+        <div>
+            <button type="button" onClick={() => navigate(-1)}>Back To</button>
+        </div>
+      </div>
+  );
 }
 
 export default function Contact() {
@@ -59,7 +81,7 @@ export default function Contact() {
           </Form>
 
           <Form
-            action="destroy"
+            action="delete"
             method="post"
             onSubmit={(event) => {
               const response = confirm(

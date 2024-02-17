@@ -1,9 +1,10 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData, useNavigate } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
-import { getContact } from "../data.server";
+import { getContact, updateContactById } from "../data.server";
+import { redirect } from "react-router-dom";
 
 export const loader = async ({
   params,
@@ -21,12 +22,20 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     const formData = await request.formData()
     const data = Object.fromEntries(formData)
 
-    console.log(data)
-    return null
+    const updateResponse = await updateContactById(params.contactId, data)
+
+    if(updateResponse.error){
+        return json({
+            data: null,
+            error: updateResponse.error,
+        })
+    }
+    return redirect('/contacts/' + params.contactId)
 }
 
 export default function EditContact() {
   const { contact } = useLoaderData<typeof loader>();
+  const navigate    = useNavigate()
 
   return (
     <Form key={contact.id} id="contact-form" method="post">
@@ -76,7 +85,7 @@ export default function EditContact() {
       </label>
       <p>
         <button type="submit">Save</button>
-        <button type="button">Cancel</button>
+        <button type="button" onClick={() => navigate(-1) }>Cancel</button>
       </p>
     </Form>
   );

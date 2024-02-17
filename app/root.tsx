@@ -11,7 +11,9 @@ import {
   ScrollRestoration,
   useLoaderData,
   Link,
-  json
+  json,
+  useRouteError,
+  isRouteErrorResponse
 } from "@remix-run/react";
 import { getContacts } from "./data.server";
 
@@ -22,6 +24,33 @@ export const links: LinksFunction = () => [
 export async function loader() {
   const contacts = await getContacts()
   return json(contacts)
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  return (
+    // eslint-disable-next-line jsx-a11y/html-has-lang
+    <html>
+      <head>
+        <title>Oops!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body className="root-error">
+        <h1>
+          Oops, Game Over!.
+        </h1>
+        <p>
+          {isRouteErrorResponse(error)
+            ? `${error.status} ${error.statusText}`
+            : error instanceof Error
+            ? error.message
+            : "Unknown Error"}
+        </p>
+        <Scripts />
+      </body>
+    </html>
+  );
 }
 
 export default function App() {
