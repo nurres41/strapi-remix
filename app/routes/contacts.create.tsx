@@ -1,17 +1,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate, useActionData } from "@remix-run/react";
-import type { ActionFunctionArgs } from "@remix-run/node";
+import { type ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import { createContact } from "../data.server";
+import { z } from 'zod'
 
 export async function action({ request } : ActionFunctionArgs) {
   const formData = await request.formData() 
   const data = Object.fromEntries(formData)
-  return data
+
+  // schema created for check
+  const formSchema = z.object({
+    avatar: z.string().url().min(2),
+    first: z.string().min(2),
+    last: z.string().min(2),
+    twitter: z.string().min(2),
+  })
+
+  // data passed for validated
+  const validatedFields = formSchema.safeParse({
+    avatar: data.avatar,
+    first: data.first,
+    last: data.last,
+    twitter: data.twitter
+  })
+
+  // depend success value
+  if(!validatedFields.success){
+    return json({
+     errors: validatedFields.error.flatten().fieldErrors,
+     message: "Please fill out all missing data",
+     data: null
+    })
+  }
+
+  const newEntry = await createContact(data);
+  return redirect("/contacts/" + newEntry.id)
 }
 
 export default function CreateContact() {
   const navigate = useNavigate();
-  const formData = useActionData();
-console.log(formData)
+  const formData = useActionData<typeof action>();
+  console.log(formData, 'data from action')
   return (
     <form method="POST">
       <div className="create-form-grid">
@@ -21,7 +50,7 @@ console.log(formData)
           type="text"
           label="First name"
           placeholder="First"
-          errors={false}
+          errors={formData?.errors}
         />
         <FormInput
           aria-label="Last name"
@@ -29,14 +58,14 @@ console.log(formData)
           type="text"
           label="Last name"
           placeholder="Last"
-          errors={false}
+          errors={formData?.errors}
         />
         <FormInput
           name="twitter"
           type="text"
           label="Twitter"
           placeholder="@jack"
-          errors={false}
+          errors={formData?.errors}
         />
         <FormInput
           aria-label="Avatar URL"
@@ -44,7 +73,7 @@ console.log(formData)
           type="text"
           label="Avatar URL"
           placeholder="https://example.com/avatar.jpg"
-          errors={false}
+          errors={formData?.errors}
         />
       </div>
       <div>

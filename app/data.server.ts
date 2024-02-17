@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable prefer-const */
 ////////////////////////////////////////////////////////////////////////////////
 // 🛑 Nothing in here has anything to do with Remix, it's just a fake database
@@ -72,7 +73,7 @@ const url = process.env.STRAPI_URL || "http://127.0.0.1:1337"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Handful of helper functions to be called from route loaders and actions
-export async function getContacts(query?: string | null) {
+export async function getContacts() {
   try{
     const response = await fetch(url + "/api/contacts")
     const data = await response.json()
@@ -83,8 +84,21 @@ export async function getContacts(query?: string | null) {
   }
 }
 
-export async function createEmptyContact() {
-
+export async function createContact(data: any) {
+  try{
+    const response = await fetch(url + "/api/contacts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ data: { ...data }})
+    })
+    const responseData = await response.json()
+    const flattenAttributesData = flattenAttributes(responseData.data)
+    return flattenAttributesData
+  }catch(err){
+    console.error(err)
+  }
 }
 
 export async function getContact(id: string) {
