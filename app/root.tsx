@@ -27,7 +27,7 @@ export async function loader() {
 export default function App() {
   // data, loader fonksiyonunun return ettigi data tipini kullanir
   const contacts = useLoaderData<typeof loader>()
-  console.log(contacts)
+
   return (
     <html lang="en">
       <head>
