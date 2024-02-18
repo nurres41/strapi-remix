@@ -73,9 +73,9 @@ const url = process.env.STRAPI_URL || "http://127.0.0.1:1337"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Handful of helper functions to be called from route loaders and actions
-export async function getContacts() {
+export async function getContacts(query ?: string | null ) {
   try{
-    const response = await fetch(url + "/api/contacts")
+    const response = await fetch(url + "/api/contacts?" + query)
     const data = await response.json()
     const flattenAttributesData = flattenAttributes(data.data)
     return flattenAttributesData

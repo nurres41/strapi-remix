@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+import qs from 'qs'
 import appStyleHref from './app.css'
 import {
   Form,
@@ -21,8 +22,17 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStyleHref }
 ];
 
-export async function loader() {
-  const contacts = await getContacts()
+const query = qs.stringify({
+  pagination: {
+    pageSize: 50,
+    page: 1,
+  }
+})
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url)
+  const query = url.searchParams.get('q')
+  const contacts = await getContacts(query)
   return json(contacts)
 }
 
@@ -82,7 +92,7 @@ export default function App() {
             <Link to="contacts/create" className="buttonLink"> Create</Link>
           </div>
           <nav>
-          {contacts.length ? (
+          {contacts?.length ? (
               <ul>
                 {contacts.map((contact : any) => (
                   <li key={contact.id}>
